@@ -1,15 +1,15 @@
 import {useState} from "react";
 import TextInput from "../components/shared/TextInput";
 import {makeAuthenticatedPOSTRequest} from "../utils/serverHelpers";
-
+import CloudinaryUpload from "../components/shared/CloudinaryUpload";
 const CreatePlaylistModal = ({closeModal}) => {
     const [playlistName, setPlaylistName] = useState("");
-    const [playlistThumbnail, setPlaylistThumbnail] = useState("");
-
+    const [thumbnail, setThumbnail] = useState("");
+    const [uploadedThumbnailFileName, setUploadedThumbnailFileName] = useState();
     const createPlaylist = async () => {
         const response = await makeAuthenticatedPOSTRequest(
             "/playlist/create",
-            {name: playlistName, thumbnail: playlistThumbnail, songs: []}
+            {name: playlistName, thumbnail: thumbnail, songs: []}
         );
         if (response._id) {
             closeModal();
@@ -38,13 +38,24 @@ const CreatePlaylistModal = ({closeModal}) => {
                         value={playlistName}
                         setValue={setPlaylistName}
                     />
-                    <TextInput
-                        label="Thumbnail"
-                        labelClassName={"text-white"}
-                        placeholder="Thumbnail"
-                        value={playlistThumbnail}
-                        setValue={setPlaylistThumbnail}
-                    />
+                     <div className="w-full flex flex-col items-center">
+                            {/* Thumbnail Upload */}
+                            {uploadedThumbnailFileName ? (
+                                <div className="w-64 h-64 ">  {/* Example height of 48 (12rem) */}
+                                <img
+                                    src={thumbnail}
+                                    alt={uploadedThumbnailFileName}
+                                    className=" w-full h-full object-cover "
+                                />
+                            </div>
+                            ) : (
+                            <CloudinaryUpload
+                                setUrl={setThumbnail}
+                                setName={setUploadedThumbnailFileName}
+                                text="Thumbnail"
+                            />
+                            )}
+                            </div>
                     <div
                         className="bg-white w-1/3 rounded flex font-semibold justify-center items-center py-3 mt-4 cursor-pointer"
                         onClick={createPlaylist}

@@ -26,21 +26,27 @@ const User = new mongoose.Schema({
         type: String,
         required: true,
     },
-    likedSongs: {
-        // We will change this to array later
-        type: String,
-        default: "",
-    },
-    likedPlaylists: {
-        // We will change this to array later
-        type: String,
-        default: "",
-    },
+    likedSongs:  [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Song",  // assuming there is a Song model
+        }
+    ],
+    likedPlaylists: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Song",  // assuming there is a Song model
+        }
+    ],
     subscribedArtists: {
         // We will change this to array later
         type: String,
         default: "",
     },
+    profileImg:{
+        type:String,
+        default:''
+    }
 });
 
 const UserModel = mongoose.model("User", User);

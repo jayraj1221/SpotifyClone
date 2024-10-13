@@ -50,6 +50,24 @@ router.get(
     }
 );
 
+router.get(
+    "/get/playlist/songs/:playlistId",
+    passport.authenticate("jwt", {session: false}),
+    async (req, res) => {
+        // This concept is called req.params
+        const playlistId = req.params.playlistId;
+        // I need to find a playlist with the _id = playlistId
+        const playlist = await Playlist.findOne({_id: playlistId}).populate({
+            path: 'songs',
+            populate: { path: 'artist' }
+        });
+        if (!playlist) {
+            return res.status(301).json({err: "Invalid ID"});
+        }
+        return res.status(200).json(playlist.songs);
+    }
+);
+
 // Get all playlists made by me
 // /get/me
 router.get(
@@ -117,5 +135,42 @@ router.post(
         return res.status(200).json(playlist);
     }
 );
+router.post(
+    "/edit-profile",
+    passport.authenticate("jwt", { session: false }),
+    async (req, res) => {
+        const currentUser = req.user;
+        const { firstName, lastName, profileImg } = req.body;
 
+        // Check if the required fields are provided
+        if (!firstName || !lastName || !profileImg) {
+            return res.status(400).json({ err: "Please provide all required fields" });
+        }
+
+        try {
+            // Find the user by their ID
+            const user = await User.findById(currentUser._id);
+
+            if (!user) {
+                return res.status(404).json({ err: "User not found" });
+            }
+
+            // Update the user's profile information
+            user.firstName = firstName;
+            user.lastName = lastName;
+            user.profileImg = profileImg;
+
+            // Save the updated user
+            await user.save();
+
+            // Return the updated user (without sensitive information like password)
+            const updatedUser = { ...user.toJSON() };
+            delete updatedUser.password;
+
+            return res.status(200).json(updatedUser);
+        } catch (error) {
+            return res.status(500).json({ err: "Internal server error" });
+        }
+    }
+);
 module.exports = router;

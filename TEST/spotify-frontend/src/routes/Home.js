@@ -1,8 +1,8 @@
 import {Icon} from "@iconify/react";
-import spotify_logo from "../assets/images/spotify_logo_white.svg";
+import spotify_logo from "../assets/images/Appical_logo.svg";
 import IconText from "../components/shared/IconText";
 import TextWithHover from "../components/shared/TextWithHover";
-
+import { useNavigate } from "react-router-dom";
 const focusCardsData = [
     {
         title: "Peaceful Piano",
@@ -60,6 +60,7 @@ const spotifyPlaylistsCardData = [
 ];
 
 const Home = () => {
+    const navigate = useNavigate();
     return (
         <div className="h-full w-full flex">
             {/* This first div will be the left panel */}
@@ -119,8 +120,8 @@ const Home = () => {
                             <div className="h-1/2 border-r border-white"></div>
                         </div>
                         <div className="w-2/5 flex justify-around h-full items-center">
-                            <TextWithHover displayText={"Sign up"} />
-                            <div className="bg-white h-2/3 px-8 flex items-center justify-center rounded-full font-semibold cursor-pointer">
+                            <TextWithHover displayText={"Sign up"} onClick={()=>navigate('/signup')}/>
+                            <div className="bg-white h-2/3 px-8 flex items-center justify-center rounded-full font-semibold cursor-pointer" onClick={()=>navigate('/login')}>
                                 Log in
                             </div>
                         </div>

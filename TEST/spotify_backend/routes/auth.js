@@ -3,7 +3,8 @@ const router = express.Router();
 const User = require("../models/User");
 const bcrypt = require("bcrypt");
 const {getToken} = require("../utils/helpers");
-
+const jwt = require("jsonwebtoken");
+const passport = require("passport");
 // This POST route will help to register a user
 router.post("/register", async (req, res) => {
     // This code is run when the /register api is called as a POST request
@@ -36,14 +37,14 @@ router.post("/register", async (req, res) => {
         username,
     };
     const newUser = await User.create(newUserData);
-    console.log(newUserData);
+    // console.log(newUserData);
 
     // Step 4: We want to create the token to return to the user
     const token = await getToken(email, newUser);
 
     // Step 5: Return the result to the user
     const userToReturn = {...newUser.toJSON(), token};
-    console.log(userToReturn);
+    // console.log(userToReturn);
     delete userToReturn.password;
     return res.status(200).json(userToReturn);
 });
@@ -58,7 +59,7 @@ router.post("/login", async (req, res) => {
         return res.status(403).json({err: "Invalid credentials"});
     }
 
-    console.log(user);
+    // console.log(user);
 
     // Step 3: If the user exists, check if the password is correct. If not, the credentials are invalid.
     // This is a tricky step. Why? Because we have stored the original password in a hashed form, which we cannot use to get back the password.
@@ -75,6 +76,83 @@ router.post("/login", async (req, res) => {
     const userToReturn = {...user.toJSON(), token};
     delete userToReturn.password;
     return res.status(200).json(userToReturn);
+});
+
+router.post("/user", async (req, res) => {
+    const { email } = req.body; // Extract email from request body
+    // console.log(email);
+    try {
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        const userToReturn = { ...user.toJSON() };
+        delete userToReturn.password; // Remove sensitive information
+        // console.log(userToReturn);
+        return res.status(200).json(userToReturn);
+    } catch (error) {
+        return res.status(500).json({ error: "Internal server error" });
+    }
+});
+
+router.post(
+    "/edit-profile",
+    passport.authenticate("jwt", { session: false }),
+    async (req, res) => {
+        console.log(req.user);
+        const currentUser = req.user;
+        const { firstName, lastName, profileImg } = req.body;
+        console.log(firstName)
+        console.log(lastName)
+        console.log(profileImg)
+        // Check if the required fields are provided
+        if (!firstName || !lastName || !profileImg) {
+            return res.status(400).json({ err: "Please provide all required fields" });
+        }
+
+        try {
+            // Find the user by their ID
+            const user = await User.findById(currentUser._id);
+
+            if (!user) {
+                return res.status(404).json({ err: "User not found" });
+            }
+
+            // Update the user's profile information
+            user.firstName = firstName;
+            user.lastName = lastName;
+            user.profileImg = profileImg;
+
+            // Save the updated user
+            await user.save();
+
+            // Return the updated user (without sensitive information like password)
+            const updatedUser = { ...user.toJSON() };
+            delete updatedUser.password;
+
+            return res.status(200).json(updatedUser);
+        } catch (error) {
+            return res.status(500).json({ err: `Internal server error${error}`});
+        }
+    }
+);
+router.get("/findArtistsByName/:name", async (req, res) => {
+    const { name } = req.params;
+
+    try {
+        // Use regular expression to find artists
+        const trimmedName = name.trim();
+        const artists = await User.find({ firstname: { $regex: new RegExp(`^${trimmedName}`, 'i') } }).lean();
+
+        if (!artists || artists.length === 0) {
+            return res.status(404).json({ error: "No artists found" });
+        }
+
+        return res.status(200).json({data:artists}); 
+    } catch (error) {
+        return res.status(500).json({ error: "Internal server error", details: error.message });
+    }
 });
 
 module.exports = router;

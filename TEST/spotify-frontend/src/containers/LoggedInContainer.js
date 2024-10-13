@@ -1,7 +1,7 @@
-import {useContext, useState, useLayoutEffect, useRef} from "react";
+import {useContext, useState, useLayoutEffect, useRef,useEffect} from "react";
 import {Howl, Howler} from "howler";
 import {Icon} from "@iconify/react";
-import spotify_logo from "../assets/images/spotify_logo_white.svg";
+import spotify_logo from "../assets/images/Appical_logo.svg";
 import IconText from "../components/shared/IconText";
 import TextWithHover from "../components/shared/TextWithHover";
 import songContext from "../contexts/songContext";
@@ -13,7 +13,8 @@ import {makeAuthenticatedPOSTRequest} from "../utils/serverHelpers";
 import { useNavigate } from 'react-router-dom';
 const LoggedInContainer = ({children, curActiveScreen}) => {
     const [createPlaylistModalOpen, setCreatePlaylistModalOpen] =
-        useState(false);
+    useState(false);
+    const [fullscreen,setFullscreen] = useState(false)
     const [addToPlaylistModalOpen, setAddToPlaylistModalOpen] = useState(false);
     const navigate = useNavigate();
     const {
@@ -27,6 +28,37 @@ const LoggedInContainer = ({children, curActiveScreen}) => {
 
     const firstUpdate = useRef(true);
 
+    const [currentTime, setCurrentTime] = useState(0);
+    const [duration, setDuration] = useState(0);
+    const handleSeek = (newTime) => {
+        soundPlayed.seek(newTime);
+        setCurrentTime(newTime);
+    };
+
+    const formatTime = (seconds) => {
+        const minutes = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${minutes}:${secs < 10 ? "0" : ""}${secs}`;
+    };
+    useEffect(() => {
+        if (soundPlayed) {
+            soundPlayed.on("end", () => setIsPaused(true));
+            soundPlayed.on("play", () => {
+                setDuration(soundPlayed.duration());
+                // updateCurrentTime();
+            });
+        }
+    }, [soundPlayed]);
+    useEffect(() => {
+        let interval;
+        if (soundPlayed && !isPaused) {
+            interval = setInterval(() => {
+                setCurrentTime(soundPlayed.seek());
+            }, 1000); // Update every second
+        }
+
+        return () => clearInterval(interval); // Clear interval when paused or unmounted
+    }, [soundPlayed, isPaused]);
     useLayoutEffect(() => {
         // the following if statement will prevent the useEffect from running on the first render.
         if (firstUpdate.current) {
@@ -53,7 +85,23 @@ const LoggedInContainer = ({children, curActiveScreen}) => {
             setAddToPlaylistModalOpen(false)
         }
     };
-
+    const likeSong = async () => {
+        const songId = currentSong._id;  // Assuming currentSong holds the song data
+    
+        const payload = { songId };  // Payload includes the song ID
+        const response = await makeAuthenticatedPOSTRequest(
+            "/song/add/liked-song",  // Backend API route for liking a song
+            payload
+        );
+    
+        if (response._id) {
+            alert("Song liked successfully!");
+            // You can close any modal or update the UI state here
+        } else {
+            alert("Error: Could not like the song.");
+        }
+    };
+    
     const playSound = () => {
         if (!soundPlayed) {
             return;
@@ -87,9 +135,20 @@ const LoggedInContainer = ({children, curActiveScreen}) => {
             setIsPaused(true);
         }
     };
+    // const handleSeek = (newTime) => {
+    //     audioRef.current.currentTime = newTime;
+    //     setCurrentTime(newTime);
+    // };
+    
+    // const formatTime = (seconds) => {
+    //     const minutes = Math.floor(seconds / 60);
+    //     const secs = Math.floor(seconds % 60);
+    //     return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
+    // };
+    
 
     return (
-        <div className="h-full w-full bg-app-black">
+        <div className="h-full w-full bg-app-black overflow-hidden">
             {createPlaylistModalOpen && (
                 <CreatePlaylistModal
                     closeModal={() => {
@@ -114,7 +173,7 @@ const LoggedInContainer = ({children, curActiveScreen}) => {
                             <img
                                 src={spotify_logo}
                                 alt="spotify logo"
-                                width={125}
+                                width={200}
                             />
                         </div>
                         <div className="py-5">
@@ -144,6 +203,13 @@ const LoggedInContainer = ({children, curActiveScreen}) => {
                                 targetLink="/myMusic"
                                 active={curActiveScreen === "myMusic"}
                             />
+                            <IconText
+                                iconName={"material-symbols:search"}
+                                displayText={"Search Artist"}
+                                targetLink="/searchArtist"
+                                active={curActiveScreen === "searchArtist"}
+                            />
+
                         </div>
                         <div className="pt-5">
                             <IconText
@@ -156,6 +222,8 @@ const LoggedInContainer = ({children, curActiveScreen}) => {
                             <IconText
                                 iconName={"mdi:cards-heart"}
                                 displayText={"Liked Songs"}
+                                targetLink="/likedSongs"
+                                active={curActiveScreen === "likedSongs"}
                             />
                         </div>
                     </div>
@@ -180,90 +248,142 @@ const LoggedInContainer = ({children, curActiveScreen}) => {
                             </div>
                             <div className="w-1/3 flex justify-around h-full items-center">
                                 <TextWithHover displayText={"Upload Song"} onClick={() => navigate('/uploadSong')}  />
-                                <div className="bg-white w-10 h-10 flex items-center justify-center rounded-full font-semibold cursor-pointer">
+                                <div className="bg-white w-10 h-10 flex items-center justify-center rounded-full font-semibold cursor-pointer" onClick={()=>navigate('/profile')}>
                                     AC
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div className="content p-8 pt-0 overflow-auto">
+                    <div className="content p-8 pt-0 overflow-auto h-full">
                         {children}
                     </div>
                 </div>
             </div>
             {/* This div is the current playing song */}
-            {currentSong && (
-                <div className="w-full h-1/10 bg-black bg-opacity-30 text-white flex items-center px-4">
-                    <div className="w-1/4 flex items-center">
-                        <img
-                            src={currentSong.thumbnail}
-                            alt="currentSongThumbail"
-                            className="h-14 w-14 rounded"
-                        />
-                        <div className="pl-4">
-                            <div className="text-sm hover:underline cursor-pointer">
-                                {currentSong.name}
-                            </div>
-                            <div className="text-xs text-gray-500 hover:underline cursor-pointer">
-                                {currentSong.artist.firstName +
-                                    " " +
-                                    currentSong.artist.lastName}
-                            </div>
-                        </div>
-                    </div>
-                    <div className="w-1/2 flex justify-center h-full flex-col items-center">
-                        <div className="flex w-1/3 justify-between items-center">
-                            {/* controls for the playing song go here */}
-                            <Icon
-                                icon="ph:shuffle-fill"
-                                fontSize={30}
-                                className="cursor-pointer text-gray-500 hover:text-white"
-                            />
-                            <Icon
-                                icon="mdi:skip-previous-outline"
-                                fontSize={30}
-                                className="cursor-pointer text-gray-500 hover:text-white"
-                            />
-                            <Icon
-                                icon={
-                                    isPaused
-                                        ? "ic:baseline-play-circle"
-                                        : "ic:baseline-pause-circle"
-                                }
-                                fontSize={50}
-                                className="cursor-pointer text-gray-500 hover:text-white"
-                                onClick={togglePlayPause}
-                            />
-                            <Icon
-                                icon="mdi:skip-next-outline"
-                                fontSize={30}
-                                className="cursor-pointer text-gray-500 hover:text-white"
-                            />
-                            <Icon
-                                icon="ic:twotone-repeat"
-                                fontSize={30}
-                                className="cursor-pointer text-gray-500 hover:text-white"
-                            />
-                        </div>
-                        {/* <div>Progress Bar Here</div> */}
-                    </div>
-                    <div className="w-1/4 flex justify-end pr-4 space-x-4 items-center">
-                        <Icon
-                            icon="ic:round-playlist-add"
-                            fontSize={30}
-                            className="cursor-pointer text-gray-500 hover:text-white"
-                            onClick={() => {
-                                setAddToPlaylistModalOpen(true);
-                            }}
-                        />
-                        <Icon
-                            icon="ph:heart-bold"
-                            fontSize={25}
-                            className="cursor-pointer text-gray-500 hover:text-white"
-                        />
-                    </div>
+            {currentSong && !fullscreen &&(
+    <div className="w-full h-20 bg-black bg-opacity-30 text-white flex items-center px-4">
+        <div className="w-1/4 flex items-center">
+            <img
+                src={currentSong.thumbnail}
+                alt="currentSongThumbnail"
+                className="h-14 w-14 rounded"
+            />
+            <div className="pl-4">
+                <div className="text-sm hover:underline cursor-pointer">
+                    {currentSong.name}
                 </div>
-            )}
+                <div className="text-xs text-gray-500 hover:underline cursor-pointer">
+                    {currentSong.artist.firstName + " " + currentSong.artist.lastName}
+                </div>
+            </div>
+        </div>
+        <div className="w-1/2 flex justify-center h-full flex-col items-center">
+            <div className="flex w-1/3 justify-between items-center">
+                {/* Controls for the playing song */}
+                <Icon
+                    icon="ph:shuffle-fill"
+                    fontSize={30}
+                    className="cursor-pointer text-gray-500 hover:text-white"
+                />
+                <Icon
+                    icon="mdi:skip-previous-outline"
+                    fontSize={30}
+                    className="cursor-pointer text-gray-500 hover:text-white"
+                />
+                <Icon
+                    icon={isPaused ? "ic:baseline-play-circle" : "ic:baseline-pause-circle"}
+                    fontSize={50}
+                    className="cursor-pointer text-gray-500 hover:text-white"
+                    onClick={togglePlayPause}
+                />
+                <Icon
+                    icon="mdi:skip-next-outline"
+                    fontSize={30}
+                    className="cursor-pointer text-gray-500 hover:text-white"
+                />
+                <Icon 
+                icon="mingcute:fullscreen-2-fill"
+                fontSize={20}
+                className="cursor-pointer text-gray-500 hover:text-white"
+                onClick={()=>{
+                    setFullscreen(true);
+                    navigate('/music-player')
+                }}
+                 />
+            </div>
+
+            {/* Progress Bar */}
+            <div className="w-full mt-2">
+    <div className="flex items-center justify-between text-xs text-gray-400 mb-1">
+        {/* Current Time */}
+        <span>{formatTime(currentTime)}</span>
+        
+        {/* Progress Bar */}
+        <div className="w-full mx-4 relative">
+            <input
+                type="range"
+                min="0"
+                max={duration} // Duration of the song
+                value={currentTime} // Current progress of the song
+                onChange={(e) => handleSeek(e.target.value)} // Handle seeking
+                className="w-full h-1 bg-gray-600 rounded-lg cursor-pointer appearance-none"
+                style={{
+                    background: `linear-gradient(to right, white ${((currentTime / duration) * 100)}%, gray ${((currentTime / duration) * 100)}%)`,
+                }}
+            />
+        </div>
+        
+        {/* Song Duration */}
+        <span>{formatTime(duration)}</span>
+    </div>
+</div>
+
+        </div>
+        <div className="w-1/4 flex justify-end pr-4 space-x-4 items-center">
+            <Icon
+                icon="ic:round-playlist-add"
+                fontSize={30}
+                className="cursor-pointer text-gray-500 hover:text-white"
+                onClick={() => {
+                    setAddToPlaylistModalOpen(true);
+                }}
+            />
+            <Icon
+                icon="ph:heart-bold"
+                fontSize={25}
+                className="cursor-pointer text-gray-500 hover:text-white"
+                onClick={()=>{
+                    likeSong();    
+                }
+                }
+            />
+        </div>
+    </div>
+)}
+
+       <style jsx>{`
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            height: 0;
+            width: 0;
+            background: transparent; /* Invisible but functional */
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            appearance: none;
+            height: 0;
+            width: 0;
+            background: transparent; /* Invisible but functional */
+        }
+
+        input[type="range"]::-ms-thumb {
+            appearance: none;
+            height: 0;
+            width: 0;
+            background: transparent; /* Invisible but functional */
+        }
+    `}</style>
         </div>
     );
 };

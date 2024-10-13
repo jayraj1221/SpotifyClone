@@ -3,6 +3,9 @@ module.exports = {
     darkMode: false, // or 'media' or 'class'
     theme: {
         extend: {
+            colors:{
+                'grecen':'#1db954',
+            },
             fontFamily: {
                 poppins: ["Poppins", "sans-serif"],
             },

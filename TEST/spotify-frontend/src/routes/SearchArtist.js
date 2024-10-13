@@ -1,36 +1,38 @@
-import {useState,useEffect} from "react";
 import LoggedInContainer from "../containers/LoggedInContainer";
+import { useState,useEffect } from "react";
 import {Icon} from "@iconify/react";
-import {makeAuthenticatedGETRequest} from "../utils/serverHelpers";
 import SingleSongCard from "../components/shared/SingleSongCard";
-
-const SearchPage = () => {
+import { makeAuthenticatedGETRequest } from "../utils/serverHelpers";
+import profile from "../assets/images/profile.png";
+import { useNavigate } from "react-router-dom";
+export const SearchArtist = ()  => 
+{
+    const navigate = useNavigate();
     const [isInputFocused, setIsInputFocused] = useState(false);
     const [searchText, setSearchText] = useState("");
-    const [songData, setSongData] = useState([]);
-
-    const searchSong = async (query) => {
-        if (query) { // Only search if query is not empty
+    const [songData, setData] = useState([])
+    const searchSong =  async (query) => {
+        if(query)
+        {
             const response = await makeAuthenticatedGETRequest(
-                "/song/get/songname/" + query
+                "/auth/findArtistsByName/" + query
             );
-            setSongData(response.data);
-        } else {
-            setSongData([]); // Clear songData if searchText is empty
+            // console.log(response.data);
+            setData(response.data);
+        }else{
+            setData([]);
         }
-    };
 
-    // Effect to trigger searchSong when searchText changes
+    }
     useEffect(() => {
         const debounceTimeout = setTimeout(() => {
             searchSong(searchText);
         }, 300); // Debounce the search by 300ms
 
         return () => clearTimeout(debounceTimeout); // Clean up on unmount or change
-    }, [searchText]); // Only re-run the effect if searchText changes
-
+    }, [searchText]);
     return (
-        <LoggedInContainer curActiveScreen="search">
+        <LoggedInContainer curActiveScreen={"searchArtist"}>
             <div className="w-full py-6">
                 <div
                     className={`w-1/3 p-3 text-sm rounded-full bg-gray-800 px-5 flex text-white space-x-3 items-center ${
@@ -67,11 +69,16 @@ const SearchPage = () => {
                         </div>
                         {songData.map((item) => {
                             return (
-                                <SingleSongCard
-                                    info={item}
-                                    key={JSON.stringify(item)}
-                                    playSound={() => {}}
-                                />
+                            <div className="w-full h-20 bg-white flex rounded-full" onClick={()=>navigate('/artistProfile',{state:{item}})}>
+                                <div className="h-full w-20  flex justify-center items-center">
+                                    
+                                    <img src={item.profileImg?item.profileImg:profile} className="w-14 h-14 rounded-full"></img>
+                                </div>
+                                <div className="h-full w-full  flex items-center p-10">
+                                    <div className="h-10 w-10 ">{item.firstName}</div>
+                                </div>
+                                
+                            </div>
                             );
                         })}
                     </div>
@@ -82,18 +89,6 @@ const SearchPage = () => {
                 )}
             </div>
         </LoggedInContainer>
+        // <div>HELLO MERE BHAOYo</div>
     );
-};
-const SingleArtistCard = ({ info }) => {
-    return (
-        <div className="flex items-center space-x-3 bg-gray-700 p-3 rounded-lg">
-            <img src={info.image} alt={info.name} className="w-10 h-10 rounded-full" />
-            <div>
-                <div className="text-white font-bold">{info.name}</div>
-                <div className="text-gray-400">{info.songs.length} songs</div>
-            </div>
-        </div>
-    );
-};
-
-export default SearchPage;
+}

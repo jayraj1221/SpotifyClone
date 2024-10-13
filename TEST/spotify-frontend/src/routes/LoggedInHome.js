@@ -1,10 +1,11 @@
-import {useState} from "react";
-import {Howl, Howler} from "howler";
+// import {useState} from "react";
+// import {Howl, Howler} from "howler";
 import {Icon} from "@iconify/react";
-import spotify_logo from "../assets/images/spotify_logo_white.svg";
-import IconText from "../components/shared/IconText";
-import TextWithHover from "../components/shared/TextWithHover";
+// import spotify_logo from "../assets/images/Appical_logo.svg";
+// import IconText from "../components/shared/IconText";
+// import TextWithHover from "../components/shared/TextWithHover";
 import LoggedInContainer from "../containers/LoggedInContainer";
+// import styles from "home.modules.css";
 
 const focusCardsData = [
     {
@@ -46,7 +47,7 @@ const spotifyPlaylistsCardData = [
         imgUrl: "https://images.unsplash.com/photo-1558021212-51b6ecfa0db9?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1766&q=80",
     },
     {
-        title: "Instrumental Study",
+        title: "Instrumentdewfal Study",
         description: "Focus with soft study music in the background.",
         imgUrl: "https://images.unsplash.com/photo-1612225330812-01a9c6b355ec?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2940&q=80",
     },
@@ -65,15 +66,16 @@ const spotifyPlaylistsCardData = [
 const Home = () => {
     return (
         <LoggedInContainer curActiveScreen="home">
+            
             <PlaylistView titleText="Focus" cardsData={focusCardsData} />
             <PlaylistView
-                titleText="Spotify Playlists"
+                titleText="Appical Playlists"
                 cardsData={spotifyPlaylistsCardData}
             />
-            <PlaylistView
+            {/* <PlaylistView
                 titleText="Sound of India"
                 cardsData={focusCardsData}
-            />
+            /> */}
         </LoggedInContainer>
     );
 };
