@@ -1,88 +1,44 @@
-// import {useState} from "react";
+import {useState,useEffect} from "react";
 // import {Howl, Howler} from "howler";
 import {Icon} from "@iconify/react";
 // import spotify_logo from "../assets/images/Appical_logo.svg";
 // import IconText from "../components/shared/IconText";
 // import TextWithHover from "../components/shared/TextWithHover";
 import LoggedInContainer from "../containers/LoggedInContainer";
+import {useContext} from "react";
+import songContext from "../contexts/songContext";
+import { makeAuthenticatedGETRequest } from "../utils/serverHelpers";
 // import styles from "home.modules.css";
 
-const focusCardsData = [
-    {
-        title: "Peaceful Piano",
-        description: "Relax and indulge with beautiful piano pieces",
-        imgUrl: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1546&q=80",
-    },
-    {
-        title: "Deep Focus",
-        description: "Keep calm and focus with this music",
-        imgUrl: "https://images.unsplash.com/photo-1558021212-51b6ecfa0db9?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1766&q=80",
-    },
-    {
-        title: "Instrumental Study",
-        description: "Focus with soft study music in the background.",
-        imgUrl: "https://images.unsplash.com/photo-1612225330812-01a9c6b355ec?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2940&q=80",
-    },
-    {
-        title: "Focus Flow",
-        description: "Up tempo instrumental hip hop beats",
-        imgUrl: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1740&q=80",
-    },
-    {
-        title: "Beats to think to",
-        description: "Focus with deep techno and tech house",
-        imgUrl: "https://images.unsplash.com/photo-1511379938547-c1f69419868d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1740&q=80",
-    },
-];
-
-const spotifyPlaylistsCardData = [
-    {
-        title: "This is one",
-        description: "Relax and indulge with beautiful piano pieces",
-        imgUrl: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1546&q=80",
-    },
-    {
-        title: "Deep Focus",
-        description: "Keep calm and focus with this music",
-        imgUrl: "https://images.unsplash.com/photo-1558021212-51b6ecfa0db9?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1766&q=80",
-    },
-    {
-        title: "Instrumentdewfal Study",
-        description: "Focus with soft study music in the background.",
-        imgUrl: "https://images.unsplash.com/photo-1612225330812-01a9c6b355ec?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2940&q=80",
-    },
-    {
-        title: "Focus Flow",
-        description: "Up tempo instrumental hip hop beats",
-        imgUrl: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1740&q=80",
-    },
-    {
-        title: "Beats to think to",
-        description: "Focus with deep techno and tech house",
-        imgUrl: "https://images.unsplash.com/photo-1511379938547-c1f69419868d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1740&q=80",
-    },
-];
 
 const Home = () => {
+    const [songData, setSongData] = useState([]);
+    const [songData1, setSongData1] = useState([]);
+
+    useEffect(() => {
+        const getData = async (playlist,setFunct) => {
+            const response = await makeAuthenticatedGETRequest(
+                "/playlist/get/playlist/songs/" + playlist
+            );
+            setFunct(response);
+        };
+        getData("6713611694920232af1cfe60",setSongData);
+        getData("6713583d73a0ebadca17a06e",setSongData1);
+        
+    }, []);
     return (
         <LoggedInContainer curActiveScreen="home">
+            <PlaylistView titleText="Sunset Chill" cardsData={songData1} />
             
-            <PlaylistView titleText="Focus" cardsData={focusCardsData} />
-            <PlaylistView
-                titleText="Appical Playlists"
-                cardsData={spotifyPlaylistsCardData}
-            />
-            {/* <PlaylistView
-                titleText="Sound of India"
-                cardsData={focusCardsData}
-            /> */}
+            <PlaylistView titleText="Navaratri 2k24 💫" cardsData={songData} />
+
         </LoggedInContainer>
     );
 };
 
 const PlaylistView = ({titleText, cardsData}) => {
     return (
-        <div className="text-white mt-8">
+        <div className="text-white mt-8 my-32">
             <div className="text-2xl font-semibold mb-5">{titleText}</div>
             <div className="w-full flex justify-between space-x-4">
                 {
@@ -90,9 +46,8 @@ const PlaylistView = ({titleText, cardsData}) => {
                     cardsData.map((item) => {
                         return (
                             <Card
-                                title={item.title}
-                                description={item.description}
-                                imgUrl={item.imgUrl}
+                                info={item}
+                                playSound={() => {}}
                             />
                         );
                     })
@@ -102,14 +57,22 @@ const PlaylistView = ({titleText, cardsData}) => {
     );
 };
 
-const Card = ({title, description, imgUrl}) => {
+const Card = ({info,playsound}) => {
+    const {currentSong, setCurrentSong,currenttime} = useContext(songContext);
     return (
-        <div className="bg-black bg-opacity-40 w-1/5 p-4 rounded-lg">
-            <div className="pb-4 pt-2">
-                <img className="w-full rounded-md" src={imgUrl} alt="label" />
+
+        <div className="bg-black bg-opacity-40 w-1/5 h-60  rounded-lg"
+        onClick={() => {
+            // setCurrentTime(0);
+            setCurrentSong(info);
+        }}>
+            <div className="pb-4 pt-2 w-full h-full bg-cover" style={{
+                    backgroundImage: `url("${info.thumbnail}")`,
+                }}>
+                {/* <img className="w-full rounded-md" src={info.thumbanail} alt="label" /> */}
             </div>
-            <div className="text-white font-semibold py-3">{title}</div>
-            <div className="text-gray-500 text-sm">{description}</div>
+            <div className="text-white font-semibold py-3">{info.name}</div>
+            <div className="text-gray-500 text-sm">{info.artist.firstName + " " + info.artist.lastName}</div>
         </div>
     );
 };

@@ -81,6 +81,11 @@ const LoggedInContainer = ({children, curActiveScreen}) => {
             "/playlist/add/song",
             payload
         );
+        if(response.err)
+        {
+            console.log("HERE IN FRONTEND");
+            alert(response.err)
+        }
         if(response._id){
             setAddToPlaylistModalOpen(false)
         }
@@ -94,7 +99,7 @@ const LoggedInContainer = ({children, curActiveScreen}) => {
             payload
         );
     
-        if (response._id) {
+        if (response.message) {
             alert("Song liked successfully!");
             // You can close any modal or update the UI state here
         } else {

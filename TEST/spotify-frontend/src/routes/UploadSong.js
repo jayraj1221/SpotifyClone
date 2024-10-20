@@ -23,7 +23,7 @@ const UploadSong = () => {
             data
         );
         if (response.err) {
-            alert("Could not create song");
+            alert(response.err);
             return;
         }
         alert("Success");
