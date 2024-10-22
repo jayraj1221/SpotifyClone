@@ -18,12 +18,40 @@ const SignupComponent = () => {
     const navigate = useNavigate();
 
     const signUp = async () => {
+        // Validation for empty fields
+        if (!email) {
+            alert("Email is required");
+            return;
+        }
+        if (!confirmEmail) {
+            alert("Confirm Email is required");
+            return;
+        }
+        if (!username) {
+            alert("Username is required");
+            return;
+        }
+        if (!password) {
+            alert("Password is required");
+            return;
+        }
+        if (!firstName) {
+            alert("First Name is required");
+            return;
+        }
+        if (!lastName) {
+            alert("Last Name is required");
+            return;
+        }
+
+        // Check if email and confirmEmail match
         if (email !== confirmEmail) {
             alert(
                 "Email and confirm email fields must match. Please check again"
             );
             return;
         }
+
         const data = {email, password, username, firstName, lastName};
         const response = await makeUnauthenticatedPOSTRequest(
             "/auth/register",
@@ -45,13 +73,12 @@ const SignupComponent = () => {
         <div className="w-full h-full flex flex-col items-center">
             <div className="logo p-5 border-b border-solid border-gray-300 w-full flex justify-center">
                 <img
-                                src={spotify_logo}
-                                alt="spotify logo"
-                                width={300}
-                            />
+                    src={spotify_logo}
+                    alt="spotify logo"
+                    width={300}
+                />
             </div>
             <div className="inputRegion w-1/3 py-10 flex items-center justify-center flex-col">
-                {/*  I will have my 2 inputs(email and password) and I will have my sign up instead button*/}
                 <div className="font-bold mb-4 text-2xl">
                     Sign up for free to start listening.
                 </div>
