@@ -42,15 +42,17 @@ const PlaylistView = ({titleText, cardsData}) => {
             <div className="text-2xl font-semibold mb-5">{titleText}</div>
             <div className="w-full flex justify-between space-x-4">
                 {
-                    // cardsData will be an array
-                    cardsData.map((item) => {
-                        return (
-                            <Card
-                                info={item}
-                                playSound={() => {}}
-                            />
+                  // cardsData will be an array
+                cardsData.slice(0, 5).map((item) => {
+                    return (
+                        <Card
+                        key={item.id} 
+                        info={item}
+                         playSound={() => {}}
+                        />
                         );
                     })
+
                 }
             </div>
         </div>

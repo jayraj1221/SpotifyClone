@@ -133,7 +133,7 @@ router.post(
         // Step 3: Check if the song is already in the playlist
         if (playlist.songs.includes(songId)) {
             console.log("HERE IT IS");
-            return res.status(304).json({ err: "Song is already in the playlist" });
+            return res.status(400).json({ message: "Song is already in the playlist" });
         }
 
         // Step 4: Add the song to the playlist

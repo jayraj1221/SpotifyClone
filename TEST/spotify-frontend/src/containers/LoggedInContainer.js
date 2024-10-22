@@ -8,8 +8,7 @@ import songContext from "../contexts/songContext";
 import CreatePlaylistModal from "../modals/CreatePlaylistModal";
 import AddToPlaylistModal from "../modals/AddToPlaylistModal";
 import {makeAuthenticatedPOSTRequest} from "../utils/serverHelpers";
-// import UploadSong from "../routes/UploadSong";
-// import { Navigate } from "react-router-dom";
+
 import { useNavigate } from 'react-router-dom';
 const LoggedInContainer = ({children, curActiveScreen}) => {
     const [createPlaylistModalOpen, setCreatePlaylistModalOpen] =
@@ -86,7 +85,12 @@ const LoggedInContainer = ({children, curActiveScreen}) => {
             console.log("HERE IN FRONTEND");
             alert(response.err)
         }
+        if(response.message)
+        {
+            alert("Song is already in the Playlist");
+        }
         if(response._id){
+            alert("Song Added to the Playlist");
             setAddToPlaylistModalOpen(false)
         }
     };

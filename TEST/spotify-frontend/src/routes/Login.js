@@ -66,7 +66,7 @@ const LoginComponent = () => {
                     value={password}
                     setValue={setPassword}
                 />
-                <div className=" w-full flex items-center justify-end my-8">
+                <div className=" w-full flex items-center justify-center my-8">
                     <button
                         className="bg-green-400 font-semibold p-3 px-10 rounded-full"
                         onClick={(e) => {

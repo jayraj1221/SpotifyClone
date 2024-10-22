@@ -3,20 +3,22 @@ import { useNavigate } from "react-router-dom";
 import { makeAuthenticatedGETRequest, makeAuthenticatedPOSTRequest } from "../utils/serverHelpers";
 import { useState,useEffect } from "react";
 import profile from "../assets/images/profile.png";
+import { useCookies } from 'react-cookie';
 export const Profile = () =>{
     const navigate = useNavigate();
     const [user, setUser] = useState(''); 
     const [loading, setLoading] = useState(true); // State to handle loading
     const [error, setError] = useState(null);
+    const [cookies, setCookie, removeCookie] = useCookies(['token']);
     const logout = () => {
         // Remove user data from local storage
         localStorage.removeItem("userData");
     
         // Clear the authentication token from cookies
-        document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-    
+        removeCookie("token");
+
         // Optionally, navigate to the login page or any other page
-        navigate("/login");
+        navigate("/home");
     };
     useEffect(() => {
         const fetchUserData = async () => {

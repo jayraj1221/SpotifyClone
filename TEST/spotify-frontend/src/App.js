@@ -1,5 +1,5 @@
 import "./output.css";
-import {useState} from "react";
+import {useState, useEffect} from "react";
 import {BrowserRouter, Routes, Route, Navigate} from "react-router-dom";
 import LoginComponent from "./routes/Login";
 import SignupComponent from "./routes/Signup";
@@ -13,21 +13,34 @@ import SinglePlaylistView from "./routes/SinglePlaylistView";
 import {useCookies} from "react-cookie";
 import songContext from "./contexts/songContext";
 import FullScreenMusicPlayer from "./routes/FullscreenSong";
-import LikedSongs from  "./routes/LikedSongs";
+import LikedSongs from "./routes/LikedSongs";
 import { Profile } from "./routes/Profile";
 import { EditProfile } from "./routes/editprofile";
 import { SearchArtist } from "./routes/SearchArtist";
 import { ArtistsProfile } from "./routes/ArtistProfile";
+
 function App() {
     const [currentSong, setCurrentSong] = useState(null);
     const [soundPlayed, setSoundPlayed] = useState(null);
     const [isPaused, setIsPaused] = useState(true);
-    const [cookie, setCookie] = useCookies(['']);
+    const [cookies, setCookie, removeCookie] = useCookies(["token"]);
+    const [loading, setLoading] = useState(true); // Add a loading state
+
+    useEffect(() => {
+        // Simulate cookie check delay for demonstration, remove or adjust as needed
+        setTimeout(() => {
+            setLoading(false); // Set loading to false once cookies are checked
+        }, 1000);
+    }, [cookies]);
+
+    if (loading) {
+        return <div>Loading...</div>; 
+    }
 
     return (
         <div className="w-screen h-screen font-poppins">
             <BrowserRouter>
-                {cookie.token ? (
+                {cookies.token ? (
                     // logged in routes
                     <songContext.Provider
                         value={{
@@ -40,28 +53,18 @@ function App() {
                         }}
                     >
                         <Routes>
-                            {/* <Route path="/" element={<HelloComponent />} /> */}
-                            <Route
-                                path="/home"
-                                element={<LoggedInHomeComponent />}
-                            />
-                            <Route
-                                path="/uploadSong"
-                                element={<UploadSong />}
-                            />
+                            <Route path="/home" element={<LoggedInHomeComponent />} />
+                            <Route path="/uploadSong" element={<UploadSong />} />
                             <Route path="/myMusic" element={<MyMusic />} />
                             <Route path="/likedSongs" element={<LikedSongs />} />
                             <Route path="/music-player" element={<FullScreenMusicPlayer />} />
                             <Route path="/search" element={<SearchPage />} />
                             <Route path="/library" element={<Library />} />
-                            <Route path='/profile' element = {<Profile/>}/>
-                            <Route path='/editprofile' element = {<EditProfile/>}></Route>
-                            <Route path='/searchArtist' element={<SearchArtist/>}></Route>
-                            <Route path='/artistProfile' element={<ArtistsProfile/>}></Route>
-                            <Route
-                                path="/playlist/:playlistId"
-                                element={<SinglePlaylistView />}
-                            />
+                            <Route path='/profile' element={<Profile/>}/>
+                            <Route path='/editprofile' element={<EditProfile/>}/>
+                            <Route path='/searchArtist' element={<SearchArtist/>}/>
+                            <Route path='/artistProfile' element={<ArtistsProfile/>}/>
+                            <Route path="/playlist/:playlistId" element={<SinglePlaylistView />} />
                             <Route path="*" element={<Navigate to="/home" />} />
                         </Routes>
                     </songContext.Provider>
@@ -78,9 +81,5 @@ function App() {
         </div>
     );
 }
-
-const HelloComponent = () => {
-    return <div>This is hello from component</div>;
-};
 
 export default App;
