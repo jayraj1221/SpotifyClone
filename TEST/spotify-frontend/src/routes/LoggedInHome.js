@@ -74,7 +74,7 @@ const Card = ({info,playsound}) => {
                 {/* <img className="w-full rounded-md" src={info.thumbanail} alt="label" /> */}
             </div>
             <div className="text-white font-semibold py-3">{info.name}</div>
-            <div className="text-gray-500 text-sm">{info.artist.firstName + " " + info.artist.lastName}</div>
+            {/* <div className="text-gray-500 text-sm">{info.artist.firstName + " " + info.artist.lastName}</div> */}
         </div>
     );
 };
